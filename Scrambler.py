@@ -1,5 +1,4 @@
-import requests,json,datetime, time,sys,csv,os,ConfigParser,argparse,textwrap,re
-#from pip._vendor.distlib.util import CSVWriter
+import sys,os,ConfigParser,argparse,textwrap,re
 
 class ArgValHex(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -29,7 +28,6 @@ def parsearguments():
     return args
 
 def encode(file,password):
-    print password
     if not password:
         print "no password set to encode/decode. "
         return
