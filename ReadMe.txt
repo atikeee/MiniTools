@@ -50,3 +50,5 @@ this is doing the same as scrambler but it has additional functionality.
 - has the command line argument options. 
 
 
+v3
+it has the feature of scramble only few header bytes. to make it faster. 
