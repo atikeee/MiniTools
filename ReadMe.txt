@@ -18,6 +18,7 @@ TTTTTT  T:::::T  TTTTTT     O::::::O   O::::::O     O::::::O   O::::::O       L:
       TTTTTTTTTTT                OOOOOOOOO               OOOOOOOOO          LLLLLLLLLLLLLLLLLLLLLLLL      SSSSSSSSSSSSSSS   
                                                                                                                             
 
+doom font
 ======================================================================================
                                         _       _                                 
                                         | |     | |                                
@@ -31,3 +32,21 @@ TTTTTT  T:::::T  TTTTTT     O::::::O   O::::::O     O::::::O   O::::::O       L:
 This is to scramble files for the whole directory. and it uses xor function to scramble the file. 
 v2 
 this has the capability of connecting multiple files together. It can stitch. 
+
+==============================================================================================================
+                                         _       _                                  _____                     
+                                        | |     | |                                / __  \                    
+ ___    ___   _ __    __ _   _ __ ___   | |__   | |   ___   _ __           __   __ `' / /'      _ __    _   _ 
+/ __|  / __| | '__|  / _` | | '_ ` _ \  | '_ \  | |  / _ \ | '__|          \ \ / /   / /       | '_ \  | | | |
+\__ \ | (__  | |    | (_| | | | | | | | | |_) | | | |  __/ | |              \ V /  ./ /___  _  | |_) | | |_| |
+|___/  \___| |_|     \__,_| |_| |_| |_| |_.__/  |_|  \___| |_|               \_/   \_____/ (_) | .__/   \__, |
+                                                                   ______                      | |       __/ |
+                                                                  |______|                     |_|      |___/ 
+===============================================================================================================
+this is doing the same as scrambler but it has additional functionality.
+- it can combine multiple files to one. 
+- it just stiches them together. 
+- one text file keep the information related to the file structure. 
+- has the command line argument options. 
+
+

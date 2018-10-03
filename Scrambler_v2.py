@@ -19,34 +19,49 @@ def parsearguments():
 
     """
     
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=textwrap.dedent(parsehelp),epilog="For scrambling a file with a hexa key.")
-    parser.add_argument('-p','--password', required = True, action=ArgValHex , help="password to be used")
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=textwrap.dedent(parsehelp),epilog="For scrambling a file with a key.")
+    parser.add_argument('-p','--password', required = False, action=ArgValHex , help="password to be used.",default = 'abcd1234')
     parser.add_argument('-f','--folder',  required=True, help="folder to work on")
     parser.add_argument('-x','--extension', required=False,  help="file extension")
-    xparser = parser.add_mutually_exclusive_group()
+    xparser = parser.add_mutually_exclusive_group(required = True)
     xparser.add_argument('-c','--combined', required=False, action = 'store_true' , help="combine all input files")
     xparser.add_argument('-s','--split', required=False, action = 'store_true' , help="split files to multiple")
-    
+    xparser.add_argument('-d','--delete', required=False, action = 'store_true' , help="make the inputdelete")
+    xparser.add_argument('-k','--keep', required=False, action = 'store_true' , help="scramble in current location")
+    parser.add_argument('-n','--name', required=False, help="Combined file name.")
     args = parser.parse_args()
     return args
 class scramblefile:
     def __init__(self,args):
         self.fo = None
+        self.splitprocess = False
         self.args = args
-        self.filerecord = os.path.join(self.args.folder,'filerecords')
-        self.fileo = os.path.join(self.args.folder,'combined')
+        filename ='combined.z'
+        records = 'combined.r'
+        
+        if args.name:
+            filename = args.name+'.z'
+            records = args.name + '.r'
+        self.filerecord = os.path.join(self.args.folder,records)
+        self.fileo = os.path.join(self.args.folder,filename)
         if self.args.combined:
             self.filerecordh = open(self.filerecord,'wb')
             if os.path.isfile(self.fileo):
                 os.unlink(self.fileo)
             self.fo = open(self.fileo,'ab')
-        
+        elif self.args.split:
+            if os.path.isfile(self.filerecord) and os.path.isfile(self.fileo):
+                self.splitprocess = True
+        self.filesprocessed = []
             
     def close(self):
         if self.args.combined:
             self.filerecordh.close()
             self.fo.close()
     def decode(self):
+        if not self.splitprocess:
+            print 'Input file is not found'
+            return 
         password = self.args.password
         password1 = password[0:2]
         password2 = password[2:4]
@@ -70,6 +85,9 @@ class scramblefile:
         filerecordh.close()
         filesz = allinfo[allinfoindx]
         curfile = os.path.join( self.args.folder,filesz[0][1:])
+        curfolder = os.path.dirname(curfile)
+        if not os.path.isdir(curfolder):
+            os.makedirs(curfolder)
         cursz = allinfo[allinfoindx][1]
         #print curfile,self.args.folder
         
@@ -93,6 +111,9 @@ class scramblefile:
                         self.fo.close()
                         filesz = allinfo[allinfoindx]
                         curfile = os.path.join( self.args.folder,filesz[0][1:])
+                        curfolder = os.path.dirname(curfile)
+                        if not os.path.isdir(curfolder):
+                            os.makedirs(curfolder)
                         cursz = allinfo[allinfoindx][1]
                         self.fo=open(curfile,'wb')
                     
@@ -117,7 +138,8 @@ class scramblefile:
         finally:
             self.fo.close()
             f.close()
-    def encode(self,file,password):
+    def encode(self,file):
+        password = self.args.password
         if not password:
             print "no password set to encode/decode. "
             return
@@ -176,25 +198,55 @@ class scramblefile:
             if os.path.isfile(file):
                 os.unlink(file)
                 os.rename(self.fileo, file)
-    def encode_decode(self):
-        if(self.args.split):
+    def functiondist(self):
+        if self.args.split:
+
             self.decode()
-        else:
+
+        elif self.args.combined or self.args.keep:
             self.scanandscramble()
-    def scanandscramble(self):    
-        for root, dirs, files in os.walk(self.args.folder):
-            for file in files:
-                if self.args.extension:
-                    if file.endswith('.'+self.args.extension):
-                        fl = os.path.join(root, file)
-                        self.encode(fl,self.args.password)
+        elif self.args.delete:
+            self.deletefiles()
+    def scanandscramble(self):
+        if self.args.password:        
+            for root, dirs, files in os.walk(self.args.folder):
+                for file in files:
+                    if self.args.extension:
+                        if file.lower().endswith('.'+self.args.extension.lower()):
+                            fl = os.path.join(root, file)
+                            self.encode(fl)
+                            
+                    else:
+                        if file.endswith('.z') or file.endswith('.r'):
+                            print 'skip output file'
+                        else:
+                            fl= os.path.join(root,file)
+                            self.encode(fl)
+                            
+    def deletefiles(self):
+        filesprocessed = []
+        if os.path.isfile(self.filerecord):
+            filerecordh = open(self.filerecord,'rb')
+            wholefile = filerecordh.read()
+            lines = wholefile.split('\n')
+            for line in lines:
+                info =  line.split('\t')
+                if len(info)>1:
+                    filesprocessed.append(info[0])
+            for f in filesprocessed:
+                curfile = os.path.join( self.args.folder,f[1:])
+                if os.path.isfile(curfile):
+                    print 'deleting file', curfile
+                    os.unlink(curfile)
                 else:
-                    fl= os.path.join(root,file)
-                    self.encode(fl, self.args.password)
-        #ecnode(fl , passwd)
+                    print 'file not found as expected.',curfile
+        else:
+            print 'Record file not found '+self.args.name+'.r'
+            #ecnode(fl , passwd)
 if __name__ == "__main__":
     args = parsearguments()
-    print args
+    #print args
     sf = scramblefile(args)
-    sf.encode_decode()
+    sf.functiondist()
+    
     sf.close()
